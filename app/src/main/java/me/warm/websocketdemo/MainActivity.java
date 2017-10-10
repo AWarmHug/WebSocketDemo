@@ -9,7 +9,7 @@ import android.widget.Toast;
 
 import java.util.Random;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener,MyWebSocket.OnMessageListener {
 
 
     private Button mStart;
@@ -29,9 +29,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mStart.setOnClickListener(this);
         mClose.setOnClickListener(this);
         mSend.setOnClickListener(this);
-
-
-//        okHttpClient.dispatcher().executorService().shutdown();
+        mWebSocket = MyWebSocket.getMyWebSocket();
+        mWebSocket.setOnMessageListener(this);
     }
 
 
@@ -39,10 +38,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.start:
-                mWebSocket = MyWebSocket.getMyWebSocket();
+                mWebSocket.connect();
                 break;
             case R.id.send:
-                if (mWebSocket==null){
+                if (mWebSocket==null||mWebSocket.getWebSocket()==null){
                     Toast.makeText(this, "请先连接", Toast.LENGTH_SHORT).show();
                 }else {
                     Random random=new Random();
@@ -53,5 +52,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mWebSocket.close(1000, "我走了");
                 break;
         }
+    }
+
+    @Override
+    public void onConnectState(MyWebSocket.CONNECT_STATE CONNECTState) {
+
+    }
+
+    @Override
+    public void onMessage(String msg) {
+        mContent.append(msg+"\n");
     }
 }
